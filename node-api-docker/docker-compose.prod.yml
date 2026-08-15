@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      target: production
+    container_name: api-container-dev
+    ports:
+      - '9880:9880'
+    volumes:
+      - ./logs/:/app/logs # if logs are given
+    env_file:
+      - ${ENV_PATH:-./.env}
+    # depends_on:
+    #   - if depends on any
+    networks:
+      - network-name
