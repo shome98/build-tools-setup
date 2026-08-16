@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    container_name: api-container-dev
+    ports:
+      - '${APP_PORT}:${CONTAINER_APP_PORT}'
+    volumes:
+      - .:/app # Map local code to container
+      - /app/node_modules # Anonymous volume to protect container's node_modules
+      - ./logs/:/app/logs # if logs are given
+      - ./drizzle/:/app/drizzle # if logs are given
+    env_file:
+      - ${ENV_PATH:-./.env}
+    # depends_on:
+    #   - if depends on any
+    networks:
+      - network-name
+
+  postgres-db_api:
+    image: postgres:16-alpine
+    restart: always
+    env_file:
+      - ${ENV_PATH:-./.env}
+    ports:
+      - '${POSTGRES_PORT_HOST}:5432'
+    volumes:
+      - ./api-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - network-name
+
+networks:
+  network-name:
+    external: true
+    name: shared-network-name
+    # driver: bridge
