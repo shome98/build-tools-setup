@@ -1,0 +1,39 @@
+services:
+  app:
+    build:
+      context: .
+      target: development
+    container_name: api-container-dev
+    ports:
+      - '${APP_PORT}:${CONTAINER_APP_PORT}'
+    volumes:
+      - .:/app # Map local code to container
+      - /app/node_modules # Anonymous volume to protect container's node_modules
+      - ./logs/:/app/logs # if logs are given
+      - ./drizzle/:/app/drizzle # if logs are given
+    env_file:
+      - ${ENV_PATH:-./.env}
+    # depends_on:
+    #   - if depends on any
+    networks:
+      - network-name
+
+  mongodb:
+    image: mongodb/mongodb-community-server:8.0-ubi8
+    # can remove the container name
+    # container_name: mongodb-09march26
+    restart: always
+    env_file:
+      - ${ENV_PATH:-./.env.development}
+    ports:
+      - '${MONGO_PORT_HOST}:27017'
+    volumes:
+      - ./mongo-data:/data/db
+    networks:
+      - network-name
+
+networks:
+  network-name:
+    external: true
+    name: shared-network-name
+    # driver: bridge
